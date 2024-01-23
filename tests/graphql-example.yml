@@ -1,0 +1,32 @@
+version: "1"
+
+type: graphql
+
+endpoint: https://countries.trevorblades.com/
+
+headers:
+  - name: is
+    value: testing
+
+variables:
+  - name: testing
+    value: test
+
+
+input:
+  - name: VAT Number
+    message: Entry the VAT number of the new submitted invoice
+    type: text
+  - name: type
+    type: list
+    choices:
+      - 2-2
+      - 1-1
+
+query: |
+  query {
+    continents{
+      code
+    }
+  }
+

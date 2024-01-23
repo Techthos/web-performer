@@ -2,6 +2,7 @@
   "name": "web-performer",
   "version": "1.0.0",
   "description": "Performs HTTP actions based on YML definitions.",
+  "type": "module",
   "main": "dist/index.js",
   "bin": {
     "performer": "bin/performer"
@@ -17,6 +18,11 @@
   "author": "Techthos L.P. <alexandros.fotiadis@techthos.net>",
   "license": "MIT",
   "dependencies": {
-    "commander": "^11.1.0"
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^18.19.8",
+    "class-validator": "^0.14.1",
+    "commander": "^11.1.0",
+    "inquirer": "^9.2.12",
+    "yaml": "^2.3.4"
   }
 }

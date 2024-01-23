@@ -1,0 +1,13 @@
+version: "1"
+
+type: http
+
+method: POST
+
+endpoint: https://test.test
+
+headers:
+  test: true
+
+body: |
+  this is the body content
