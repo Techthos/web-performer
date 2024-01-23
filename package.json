@@ -1,0 +1,22 @@
+{
+  "name": "web-performer",
+  "version": "1.0.0",
+  "description": "Performs HTTP actions based on YML definitions.",
+  "main": "dist/index.js",
+  "bin": {
+    "performer": "bin/performer"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Techthos L.P. <alexandros.fotiadis@techthos.net>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0"
+  }
+}
