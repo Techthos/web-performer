@@ -2,12 +2,26 @@ version: "1"
 
 type: http
 
-method: POST
-
 endpoint: https://test.test
 
+method: POST
+
 headers:
-  test: true
+  - name: is
+    value: testing
+
+input:
+  - name: VATNumber
+    context: headers
+    message: Entry the VAT number of the new submitted invoice
+    type: input
+
+  - name: type
+    type: list
+    context: variables
+    choices:
+      - 2-2
+      - 1-1
 
 body: |
   this is the body content

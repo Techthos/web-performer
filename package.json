@@ -1,6 +1,6 @@
 {
   "name": "web-performer",
-  "version": "1.0.0",
+  "version": "1.0.0-rc1",
   "description": "Performs HTTP actions based on YML definitions.",
   "type": "module",
   "main": "dist/index.js",
@@ -17,9 +17,11 @@
   },
   "author": "Techthos L.P. <alexandros.fotiadis@techthos.net>",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "@types/inquirer": "^9.0.7",
-    "@types/node": "^18.19.8",
+    "@types/node": "^18.19.8"
+  },
+  "dependencies": {
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "commander": "^11.1.0",
