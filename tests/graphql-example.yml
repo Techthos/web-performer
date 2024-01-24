@@ -12,13 +12,15 @@ variables:
   - name: testing
     value: test
 
-
 input:
-  - name: VAT Number
+  - name: VATNumber
+    context: headers
     message: Entry the VAT number of the new submitted invoice
-    type: text
+    type: input
+
   - name: type
     type: list
+    context: variables
     choices:
       - 2-2
       - 1-1

@@ -1,5 +1,7 @@
-import { IsAlpha, IsArray, IsEnum, IsIn, IsObject, IsOptional, IsString, IsUrl, ValidateNested } from "class-validator";
+import { Transform, Type } from "class-transformer";
+import {  IsAlphanumeric, IsArray, IsEnum, IsIn, IsObject, IsOptional, IsString, IsUrl, ValidateNested } from "class-validator";
 import inquirer, { Answers, QuestionCollection } from "inquirer";
+import { validate } from "./helpers.js";
 
 
 export enum RUNNER_TYPES {
@@ -18,18 +20,30 @@ export class BasePerformerFile {
 
 export class PerformerFileHeaderEntry {
     @IsString()
-    name!: string
+    name: string
 
     @IsString()
-    value!: string
+    @Transform(({value}) => `${value}`)
+    value: string
+
+
+    constructor(data: any) {
+        this.name = data['name']
+        this.value = data['value']
+    }
 }
 
 export class PerformerFileVariableEntry {
     @IsString()
-    name!: string
+    @IsAlphanumeric()
+    name: string
 
-    @IsString()
-    value!: string
+    value: any
+
+    constructor(data: any) {
+        this.name = data['name']
+        this.value = data['value']
+    }
 }
 
 export enum PerformerFileInputEntryTypes {
@@ -42,20 +56,39 @@ export enum PerformerFileInputEntryTypes {
     LIST = 'list',
 }
 
+export enum PerformerFileInputEntryContext {
+    headers = 'headers',
+    variables = 'variables',
+}
+
 export class PerformerFileInputEntry {
+
+
     @IsString()
-    name!: string
+    @IsAlphanumeric()
+    name: string
 
     @IsEnum(PerformerFileInputEntryTypes)
-    type!: PerformerFileInputEntryTypes
+    type: PerformerFileInputEntryTypes
+
+    @IsEnum(PerformerFileInputEntryContext)
+    context: PerformerFileInputEntryContext
 
     @IsArray()
     @IsOptional()
-    choices!: string[]
+    choices: string[]
 
     @IsString()
     @IsOptional()
-    message!: string
+    message: string
+
+    constructor(data: any) {
+        this.name = data['name']
+        this.type = data['type']
+        this.context = data['context']
+        this.choices = data['choices']
+        this.message = data['message']
+    }
 }
 
 export class GraphQLPerformerFile extends BasePerformerFile {
@@ -64,20 +97,17 @@ export class GraphQLPerformerFile extends BasePerformerFile {
     @IsUrl({require_host: true, require_protocol: true})
     endpoint: string
 
-    @IsArray()
-    @ValidateNested()
-    @IsOptional()
+    @ValidateNested({each: true})
+    @Type(() => PerformerFileHeaderEntry)
     headers: PerformerFileHeaderEntry[]
 
-    @IsArray()
-    @ValidateNested()
-    @IsOptional()
+    @ValidateNested({each: true})
+    @Type(() => PerformerFileVariableEntry)
     variables: PerformerFileVariableEntry[]
 
-    @IsArray()
-    @ValidateNested()
-    @IsOptional()
-    input: PerformerFileInputEntry[]
+    @ValidateNested({each: true})
+    @Type(() => PerformerFileInputEntry)
+    input?: PerformerFileInputEntry[]
 
     @IsString()
     query: string
@@ -87,9 +117,17 @@ export class GraphQLPerformerFile extends BasePerformerFile {
 
         this.endpoint = data['endpoint']
         this.query = data['query']
-        this.headers = data['headers']
-        this.variables = data['variables']
-        this.input = data['input']
+
+        if(Array.isArray(data['headers'])) {
+            this.headers = data['headers'].map(data => new PerformerFileHeaderEntry(data))
+        }
+
+        if(Array.isArray(data['variables'])) {
+            this.variables = data['variables'].map(data => new PerformerFileVariableEntry(data))
+        }
+        if(Array.isArray(data['input'])) {
+            this.input = data['input'].map(data => new PerformerFileInputEntry(data))
+        }
     }
 
 
@@ -107,14 +145,38 @@ export class GraphQLPerformerFile extends BasePerformerFile {
         }, {} as any)
     }
 
+    validate(exist = true) {
+
+        return validate(this, exist)
+
+    }
+
     async inquirer() {
+
+            if(!this.input || this.input.length === 0) return {}
 
             const questions = this.input.map((entry) => {
                 return {
                     name: entry.name,
                     type: entry.type as any,
                     choices: entry.choices,
-                    message: entry.message
+                    message: entry.message,
+                    validate: (value) => {
+                        if(entry.context === PerformerFileInputEntryContext.headers) {
+                            this.headers.push({
+                                name: entry.name,
+                                value
+                            })
+                        } else if(entry.context === PerformerFileInputEntryContext.variables) {
+                            this.variables.push({
+                                name: entry.name,
+                                value
+                            })
+                        }
+
+                        const errors = this.validate(false)
+                        return errors.length === 0
+                    },
                 } as QuestionCollection<Answers>
             })
 
@@ -122,12 +184,9 @@ export class GraphQLPerformerFile extends BasePerformerFile {
     }
 
     async perform() {
-        console.log(this._headers)
         const response = await fetch(this.endpoint, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: this._headers,
             body: JSON.stringify({
                 query: this.query,
                 variables: this._variables

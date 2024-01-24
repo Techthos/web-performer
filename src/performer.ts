@@ -20,7 +20,9 @@ program.version("0.0.1")
     
         if(baseData.type === RUNNER_TYPES.GRAPHQL) {
             const file = new GraphQLPerformerFile(data)
-            validate(file)
+
+            file.validate()
+
             await file.inquirer()
             await file.perform()
         }
