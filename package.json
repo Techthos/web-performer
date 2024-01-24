@@ -1,5 +1,5 @@
 {
-  "name": "web-performer",
+  "name": "@techthos/web-performer",
   "version": "1.0.0-rc1",
   "description": "Performs HTTP actions based on YML definitions.",
   "type": "module",
